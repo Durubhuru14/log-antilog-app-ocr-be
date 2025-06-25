@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Draw and Upload</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: white;
+    }
+    canvas {
+      display: block;
+      cursor: crosshair;
+    }
+    #btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1;
+    }
+    button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #result {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-size: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 6px;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="btns">
+    <button onclick="saveImage()">Download</button>
+    <button onclick="submitToServer()">Submit</button>
+  </div>
+  <canvas id="drawCanvas"></canvas>
+  <div id="result">Result will appear here...</div>
+
+  <script>
+    const canvas = document.getElementById("drawCanvas");
+    const ctx = canvas.getContext("2d");
+    const resultDiv = document.getElementById("result");
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 5;
+    ctx.lineCap = "round";
+
+    let isDrawing = false;
+
+    canvas.addEventListener("mousedown", (e) => {
+      isDrawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!isDrawing) return;
+      ctx.lineTo(e.clientX, e.clientY);
+      ctx.stroke();
+    });
+
+    canvas.addEventListener("mouseup", () => isDrawing = false);
+    canvas.addEventListener("mouseout", () => isDrawing = false);
+
+    function saveImage() {
+      const link = document.createElement("a");
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+
+      tempCtx.fillStyle = "white";
+      tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+      tempCtx.drawImage(canvas, 0, 0);
+
+      link.download = "drawing.jpeg";
+      link.href = tempCanvas.toDataURL("image/jpeg", 1.0);
+      link.click();
+    }
+
+    async function submitToServer() {
+      resultDiv.textContent = "Processing...";
+
+      const blob = await new Promise(resolve => {
+        const tempCanvas = document.createElement("canvas");
+        const tempCtx = tempCanvas.getContext("2d");
+
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+
+        tempCtx.fillStyle = "white";
+        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+        tempCtx.drawImage(canvas, 0, 0);
+
+        tempCanvas.toBlob(resolve, "image/png", 1.0);
+      });
+
+      const formData = new FormData();
+      formData.append("image", blob, "drawing.png");
+
+      try {
+        const res = await fetch("http://localhost:3000/api/calc-from-image", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`Server error ${res.status}: ${err}`);
+        }
+
+        const data = await res.json();
+        const result= data.result || "No result";
+        result.split("/").map((item, index) => {
+          if(index === 0) {
+            console.log(`Multiplication result: ${item.trim()}`);
+          } else {
+            console.log(`Division result: ${item.trim()}`);
+          }
+        })
+        resultDiv.textContent = "Result: " + (result);
+      } catch (err) {
+        console.error("❌ Upload failed:", err);
+        resultDiv.textContent = "Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
