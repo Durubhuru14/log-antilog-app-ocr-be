@@ -70,13 +70,13 @@ term1,term2,... ÷ term1,term2,...
 - No extra symbols like "*", "c", or "π"
 Examples:
 - Input: 0.3173 * 0.123 power to 2 divided by sin(30°)
-  Output: "0.3173,0.123^2 / sin(30 deg)"
+  Output: "0.3173,0.123^2 ÷ sin(30 deg)"
 - Input: 2 * π divided by cos(π radian)
-  Output: "2,pi / cos(pi rad)"
+  Output: "2,pi ÷ cos(pi rad)"
 - Input: sin(2ᶜ) * 0.5 divided by tan(pi)
-  Output: "sin(2 rad),0.5 / tan(pi)"
+  Output: "sin(2 rad),0.5 ÷ tan(pi)"
 - Input: cos(0.323ᶜ) / 0.1
-  Output: "cos(0.323 rad) / 0.1"
+  Output: "cos(0.323 rad) ÷ 0.1"
 - Input: sin(0.328ᶜ)
   Output: "sin(0.328 rad)"
 - Input: tan(5ᶜ)
