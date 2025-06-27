@@ -64,10 +64,10 @@ Read the handwritten or printed math expression from the image. The expression m
     - "π", "pi", "Pi" → always convert to "pi" in output
 Output Should Be like the following:
 A single string like this:
-term1,term2,... / term1,term2,...
+term1,term2,... ÷ term1,term2,...
 - Terms before division = multiplication group
 - Terms after division = division group
-- No extra symbols like "*", "/", or "π"
+- No extra symbols like "*", "c", or "π"
 Examples:
 - Input: 0.3173 * 0.123 power to 2 divided by sin(30°)
   Output: "0.3173,0.123^2 / sin(30 deg)"
